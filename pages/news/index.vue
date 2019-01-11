@@ -13,37 +13,37 @@
 </template>
 
 <script>
-import axios from 'axios';
+import { getNews } from '../../services/backend';
 
 
 export default {
-  data() {
-    return {
-      data: [],
+  asyncData({ query, ...context }) {
+    const { limit = 10, page = 1 } = query;
 
-      limit: 10,
-      page: 1,
-    };
+    return getNews({
+      _limit: limit,
+      _page: page,
+    })
+      .then(data => { console.log('DAAAATA', data); return data; })
+      .then(data => ({
+        data: data.map(item => item.toObject()),
+
+        limit,
+        page,
+      }))
+    ;
   },
 
   methods: {
     getNews() {
-      return axios({
-        url: 'https://jsonplaceholder.typicode.com/posts',
-        params: {
+      return getNews({
           _limit: this.limit,
           _page: this.page,
-        },
       })
-        .then(res => res.data)
         .then(data => { this.data = data; })
         .catch(err => { console.log(err); })
       ;
     },
-  },
-
-  created() {
-    this.getNews();
   },
 
   head: {
